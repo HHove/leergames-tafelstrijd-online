@@ -1,0 +1,1981 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leergames - Tafelstrijd</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --paper: #ffffff;
+      --ink: #152033;
+      --muted: #64748b;
+      --line: #d7deea;
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --mint: #10b981;
+      --sun: #f59e0b;
+      --rose: #e11d48;
+      --sky: #0284c7;
+      --track: #e7edf5;
+      --shadow: 0 10px 26px rgba(21, 32, 51, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(79, 70, 229, 0.10), transparent 34%),
+        linear-gradient(315deg, rgba(16, 185, 129, 0.12), transparent 32%),
+        var(--bg);
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .site {
+      width: min(1180px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 14px 0 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 1px solid rgba(215, 222, 234, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 8px;
+      background: #1f2937;
+      color: white;
+      font-size: 24px;
+      box-shadow: inset 0 -5px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: clamp(1.55rem, 5vw, 2.25rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .panel {
+      border: 1px solid rgba(215, 222, 234, 0.92);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .pad { padding: clamp(14px, 2vw, 20px); }
+
+    .grid { display: grid; gap: 14px; }
+    .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .two-grid { grid-template-columns: minmax(0, 1.05fr) minmax(310px, 0.95fr); }
+    .game-grid { grid-template-columns: minmax(310px, 0.92fr) minmax(320px, 1.08fr); }
+    .stats-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .result-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .stack { display: grid; gap: 14px; }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .wrap { flex-wrap: wrap; }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h2 { margin-bottom: 10px; font-size: clamp(1.55rem, 3.4vw, 2.2rem); line-height: 1.05; letter-spacing: 0; }
+    h3 { margin-bottom: 8px; font-size: 1.05rem; letter-spacing: 0; }
+    p { color: var(--muted); line-height: 1.55; }
+
+    .game-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .mode-tile {
+      display: grid;
+      min-height: 260px;
+      align-content: space-between;
+      gap: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mode-tile::after {
+      content: attr(data-icon);
+      position: absolute;
+      right: 18px;
+      bottom: 8px;
+      opacity: 0.18;
+      font-size: clamp(5rem, 15vw, 10rem);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .mode-copy {
+      max-width: 28rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: #e9eef7;
+      color: var(--ink);
+      font-weight: 900;
+      text-align: center;
+      transition: transform 0.08s ease, background 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .button:hover { box-shadow: 0 8px 18px rgba(21, 32, 51, 0.12); }
+    .button:active { transform: scale(0.98); }
+    .primary { background: var(--primary); color: white; }
+    .primary:hover { background: var(--primary-dark); }
+    .success { background: var(--mint); color: white; }
+    .danger { color: white; background: var(--rose); }
+    .ghost { background: transparent; border: 1px solid var(--line); }
+
+    .field {
+      width: 100%;
+      min-height: 48px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background: #eef3f9;
+      color: var(--ink);
+      padding: 11px 12px;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .field:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 330px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .avatar-button {
+      min-height: 62px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background: #eef3f9;
+      font-size: 2rem;
+    }
+
+    .avatar-button.active {
+      border-color: var(--primary-dark);
+      background: var(--primary);
+      color: white;
+    }
+
+    .avatar {
+      display: inline-block;
+      line-height: 1;
+      transform: scaleX(-1);
+    }
+
+    .table-grid, .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .choice-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .select-button {
+      min-height: 48px;
+      border-radius: 8px;
+      background: #eef3f9;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .select-button.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .player-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: #eef3f9;
+      font-weight: 900;
+    }
+
+    .player-row span:last-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #eef3f9;
+    }
+
+    .stat-label {
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: clamp(1.15rem, 2.8vw, 1.65rem);
+      font-weight: 1000;
+    }
+
+    .track-card {
+      padding: 16px;
+    }
+
+    .lane {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .lane-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 900;
+    }
+
+    .track {
+      position: relative;
+      height: 82px;
+      overflow: hidden;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.55) 0 16px, transparent 16px 32px),
+        var(--track);
+      box-shadow: inset 0 4px 12px rgba(21, 32, 51, 0.08);
+    }
+
+    .track-line {
+      position: absolute;
+      left: 16px;
+      right: 56px;
+      top: 50%;
+      height: 4px;
+      transform: translateY(-50%);
+      border-radius: 999px;
+      background: #cbd5e1;
+    }
+
+    .finish-line {
+      position: absolute;
+      right: 44px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--rose);
+    }
+
+    .flag {
+      position: absolute;
+      right: 7px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2.4rem;
+    }
+
+    .racer {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: left 0.45s ease;
+      font-size: 3.8rem;
+      line-height: 1;
+      filter: drop-shadow(0 8px 8px rgba(21, 32, 51, 0.18));
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #eef3f9;
+      font-weight: 900;
+    }
+
+    .question {
+      padding: clamp(16px, 3vw, 24px);
+      text-align: center;
+    }
+
+    .sum {
+      margin: 4px 0 18px;
+      color: var(--ink);
+      font-size: clamp(4.3rem, 16vw, 8.8rem);
+      font-weight: 1000;
+      line-height: 0.95;
+      letter-spacing: 0;
+      transition: color 0.18s ease;
+    }
+
+    .sum.green { color: #059669; }
+    .sum.orange { color: #ea580c; }
+    .sum.red { color: #dc2626; }
+
+    .answer {
+      width: 100%;
+      min-height: 92px;
+      border: 4px solid #cbd5e1;
+      border-radius: 8px;
+      background: #eef3f9;
+      color: var(--ink);
+      padding: 8px 12px;
+      text-align: center;
+      font-size: clamp(3rem, 11vw, 5.6rem);
+      font-weight: 1000;
+      outline: none;
+    }
+
+    .answer.green { border-color: #10b981; background: #dcfce7; color: #047857; }
+    .answer.orange { border-color: #fb923c; background: #ffedd5; color: #c2410c; }
+    .answer.red { border-color: #ef4444; background: #fee2e2; color: #b91c1c; }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #eef3f9;
+    }
+
+    .key {
+      min-height: 56px;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 1.65rem;
+      font-weight: 1000;
+      box-shadow: 0 4px 0 #dbe4ef;
+    }
+
+    .key.enter {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 0 var(--primary-dark);
+    }
+
+    .key.clear {
+      grid-column: 1 / -1;
+      min-height: 44px;
+      color: var(--rose);
+      font-size: 1rem;
+    }
+
+    .message {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #fef3c7;
+      color: #8a4b0b;
+      font-size: 1.1rem;
+      font-weight: 1000;
+      text-align: center;
+    }
+
+    .note {
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 900;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .note.amber { background: #fef3c7; color: #92400e; }
+    .note.indigo { background: #e0e7ff; color: #3730a3; }
+
+    .party-stage {
+      position: relative;
+      display: grid;
+      min-height: 170px;
+      place-items: center;
+      margin: 16px 0;
+      overflow: hidden;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ffe4e6, #fef3c7, #dbeafe);
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: 18px;
+      font-size: 3.4rem;
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    .balloon.left { left: 18px; }
+    .balloon.right { right: 18px; animation-delay: 0.35s; }
+
+    .winner-face {
+      text-align: center;
+      font-weight: 1000;
+      font-size: 1.8rem;
+    }
+
+    .podium {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: end;
+      gap: 10px;
+      margin: 16px 0;
+      text-align: center;
+    }
+
+    .podium-block {
+      display: grid;
+      place-items: center;
+      min-height: 90px;
+      border-radius: 8px 8px 0 0;
+      background: #eef3f9;
+      font-size: 2rem;
+      font-weight: 1000;
+    }
+
+    .podium-block.place-1 { min-height: 138px; background: #fef3c7; }
+    .podium-block.place-2 { min-height: 112px; background: #e0f2fe; }
+    .podium-block.place-3 { min-height: 98px; background: #f1f5f9; }
+
+    .mini-shell {
+      min-height: calc(100vh - 120px);
+      border-radius: 8px;
+      background: #111827;
+      color: #ffffff;
+      padding: clamp(14px, 2vw, 20px);
+      box-shadow: var(--shadow);
+    }
+
+    .mini-board {
+      position: relative;
+      min-height: 500px;
+      margin-top: 14px;
+      overflow: hidden;
+      border: 2px solid #334155;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+        #1f2937;
+      background-size: 56px 48px;
+    }
+
+    .mini-item {
+      position: absolute;
+      font-size: 2.8rem;
+      line-height: 1;
+      transition: left 0.1s ease, top 0.1s ease;
+    }
+
+    .goal {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      width: 12px;
+      height: 132px;
+      transform: translateY(-50%);
+      border-radius: 999px;
+      background: #ffffff;
+    }
+
+    .mini-controls {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(42px, 70px));
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .mini-controls .up { grid-column: 2; }
+    .mini-controls .left { grid-column: 1; grid-row: 2; }
+    .mini-controls .down { grid-column: 2; grid-row: 2; }
+    .mini-controls .right { grid-column: 3; grid-row: 2; }
+    .mini-controls .shoot { grid-column: 4 / 6; grid-row: 1 / 3; height: 100%; }
+
+    .confetti {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      overflow: hidden;
+    }
+
+    .confetti i {
+      position: absolute;
+      top: -24px;
+      width: 10px;
+      height: 18px;
+      border-radius: 3px;
+      animation: fall linear infinite;
+    }
+
+    .empty {
+      min-height: 60px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .room-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: #eef3f9;
+      color: var(--primary-dark);
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: 1000;
+      letter-spacing: 0;
+    }
+
+    .error {
+      padding: 12px;
+      border-radius: 8px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-weight: 900;
+    }
+
+    .turn-banner {
+      display: grid;
+      place-items: center;
+      min-height: 62px;
+      margin-top: 12px;
+      border-radius: 8px;
+      background: #e0f2fe;
+      color: #075985;
+      font-size: 1.05rem;
+      font-weight: 1000;
+      text-align: center;
+    }
+
+    @keyframes fall {
+      from { transform: translateY(-10vh) rotate(0deg); }
+      to { transform: translateY(110vh) rotate(720deg); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+
+    @media (max-width: 900px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .nav { justify-content: flex-start; width: 100%; }
+      .home-grid, .two-grid, .game-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats-grid .stat:first-child { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 560px) {
+      .site { width: min(100% - 16px, 1180px); padding-top: 8px; }
+      .avatar-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .table-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .choice-grid, .result-grid, .podium { grid-template-columns: 1fr; }
+      .mode-tile { min-height: 220px; }
+      .sum { font-size: clamp(3.75rem, 23vw, 6.6rem); }
+      .mini-board { min-height: 390px; }
+      .mini-controls { grid-template-columns: repeat(3, minmax(50px, 1fr)); }
+      .mini-controls .shoot { grid-column: 1 / -1; grid-row: 3; min-height: 52px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    const AVATARS = [
+      { id: "car", name: "Auto", icon: "🚗" }, { id: "race", name: "Raceauto", icon: "🏎️" },
+      { id: "truck", name: "Truck", icon: "🛻" }, { id: "tractor", name: "Tractor", icon: "🚜" },
+      { id: "bike", name: "Fiets", icon: "🚲" }, { id: "motor", name: "Motor", icon: "🏍️" },
+      { id: "plane", name: "Vliegtuig", icon: "✈️" }, { id: "rocket", name: "Raket", icon: "🚀" },
+      { id: "boat", name: "Boot", icon: "🚤" }, { id: "train", name: "Trein", icon: "🚂" },
+      { id: "horse", name: "Paard", icon: "🐎" }, { id: "dog", name: "Hond", icon: "🐕" },
+      { id: "lion", name: "Leeuw", icon: "🦁" }, { id: "tiger", name: "Tijger", icon: "🐅" },
+      { id: "dragon", name: "Draak", icon: "🐉" }, { id: "dino", name: "Dino", icon: "🦖" },
+      { id: "unicorn", name: "Eenhoorn", icon: "🦄" }, { id: "helicopter", name: "Helikopter", icon: "🚁" },
+      { id: "scooter", name: "Step", icon: "🛴" }, { id: "ambulance", name: "Ambulance", icon: "🚑" },
+      { id: "police", name: "Politie", icon: "🚓" }, { id: "taxi", name: "Taxi", icon: "🚕" },
+      { id: "metro", name: "Metro", icon: "🚇" }, { id: "sail", name: "Zeilboot", icon: "⛵" },
+      { id: "alien", name: "Alien", icon: "👽" }, { id: "robot", name: "Robot", icon: "🤖" },
+    ];
+
+    const AI = {
+      easy: { name: "Easy", speed: 3800, points: 9 },
+      medium: { name: "Intermediate", speed: 2700, points: 11 },
+      expert: { name: "Expert", speed: 2200, points: 12 },
+    };
+
+    const GAMES = [
+      { id: "snake", name: "Snake", icon: "⭐" },
+      { id: "soccer", name: "Penalty Soccer", icon: "⚽" },
+      { id: "dodge", name: "Dodge Run", icon: "🟧" },
+    ];
+
+    const LAN_ORIGIN = "http://192.168.178.142:4175";
+
+    const state = {
+      screen: "home",
+      mode: "multi",
+      code: "",
+      tables: [1, 2, 3, 4, 5],
+      rounds: 20,
+      level: "easy",
+      name: "Speler",
+      skin: "horse",
+      newName: "",
+      newSkin: "car",
+      players: [
+        { id: 1, name: "Speler 1", skin: "horse", score: 0, streak: 0, answers: 0, ai: false },
+        { id: 2, name: "Speler 2", skin: "car", score: 0, streak: 0, answers: 0, ai: false },
+      ],
+      turn: 0,
+      qNum: 1,
+      q: null,
+      answer: "",
+      msg: "",
+      feedbackColor: "neutral",
+      bonus: false,
+      bonusMsg: "",
+      repeatQueue: [],
+      repeatMsg: "",
+      mistakeCounts: {},
+      aiWinStreak: 0,
+      miniChoices: [],
+      miniGame: null,
+      miniTime: 60,
+      miniScore: 0,
+      miniPos: { x: 5, y: 5 },
+      miniTarget: { x: 12, y: 7 },
+      miniBad: { x: 3, y: 3 },
+      networkName: "Speler",
+      networkSkin: "horse",
+      networkJoinCode: "",
+      networkClientId: "",
+      networkRoom: null,
+      networkAnswer: "",
+      networkError: "",
+      networkLoading: false,
+    };
+
+    state.q = newQuestion(state.tables);
+
+    let questionStartedAt = Date.now();
+    let nextTimer = null;
+    let aiTimer = null;
+    let aiTimerLevel = null;
+    let bonusTimer = null;
+    let miniTimer = null;
+    let networkPollTimer = null;
+    let networkRefreshing = false;
+    const app = document.querySelector("#app");
+
+    function rand(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function roomCode() {
+      return Math.random().toString(36).substring(2, 7).toUpperCase();
+    }
+
+    function newQuestion(tables) {
+      const a = rand(tables.length ? tables : [1]);
+      const b = Math.floor(Math.random() * 10) + 1;
+      return { a, b, answer: a * b, text: `${a} × ${b}` };
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getAvatar(id) {
+      return AVATARS.find((avatar) => avatar.id === id) || AVATARS[0];
+    }
+
+    function avatar(id, size = 42) {
+      const selected = getAvatar(id);
+      return `<span class="avatar" style="font-size:${size}px" aria-label="${escapeHtml(selected.name)}">${selected.icon}</span>`;
+    }
+
+    function finishScore() {
+      return Math.max(120, state.rounds * 14);
+    }
+
+    function sortedPlayers() {
+      return [...state.players].sort((a, b) => b.score - a.score);
+    }
+
+    function activePlayer() {
+      const fallback = { id: 0, name: "Speler", skin: "horse", score: 0, streak: 0, answers: 0, ai: false };
+      if (state.mode === "ai") return state.players[0] || fallback;
+      return state.players[state.turn % Math.max(state.players.length, 1)] || fallback;
+    }
+
+    function render() {
+      const focusedId = document.activeElement?.id;
+      app.innerHTML = `
+        <main class="site">
+          <header class="topbar">
+            <div class="brand">
+              <div class="brand-mark">⚡</div>
+              <div>
+                <h1 class="brand-title">Leergames</h1>
+                <p class="brand-sub">Tafelstrijd</p>
+              </div>
+            </div>
+            <nav class="nav" aria-label="Navigatie">
+              <button class="button ghost" data-action="home">Home</button>
+              <button class="button ghost" data-action="open-multi">Multiplayer</button>
+              <button class="button ghost" data-action="open-network">Netwerk</button>
+              <button class="button ghost" data-action="open-ai">AI</button>
+              <span class="button" aria-live="polite">AI reeks ${state.aiWinStreak}/2</span>
+            </nav>
+          </header>
+          ${screenTemplate()}
+        </main>
+      `;
+
+      syncTimers();
+
+      if (state.screen === "game" && !state.msg) {
+        questionStartedAt = Date.now();
+        window.setTimeout(() => {
+          const input = document.querySelector("#answer");
+          if (input) input.focus();
+        }, 30);
+      }
+
+      if (state.screen === "networkRoom" && focusedId === "network-answer") {
+        window.setTimeout(() => {
+          const input = document.querySelector("#network-answer");
+          if (input && !input.disabled) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+          }
+        }, 0);
+      }
+    }
+
+    function screenTemplate() {
+      if (state.screen === "home") return homeTemplate();
+      if (state.screen === "ai") return aiTemplate();
+      if (state.screen === "lobby") return lobbyTemplate();
+      if (state.screen === "network") return networkTemplate();
+      if (state.screen === "networkRoom") return networkRoomTemplate();
+      if (state.screen === "game") return gameTemplate();
+      if (state.screen === "result") return resultTemplate();
+      if (state.screen === "minigame") return miniGameTemplate();
+      return homeTemplate();
+    }
+
+    function homeTemplate() {
+      return `
+        <section class="grid home-grid">
+          <article class="panel pad mode-tile" data-icon="🏁">
+            <div class="mode-copy">
+              <div class="game-title">🏁 Multiplayer</div>
+              <p>Speel samen op één scherm met eigen namen, avatars en een gedeelde racebaan.</p>
+            </div>
+            <button class="button primary" data-action="open-multi">Maak room</button>
+          </article>
+          <article class="panel pad mode-tile" data-icon="🚀">
+            <div class="mode-copy">
+              <div class="game-title">🚀 Tegen AI</div>
+              <p>Neem het op tegen de raket-AI. Twee zeges op rij openen een korte minigame.</p>
+            </div>
+            <button class="button primary" data-action="open-ai">Tegen AI</button>
+          </article>
+          <article class="panel pad mode-tile" data-icon="📱">
+            <div class="mode-copy">
+              <div class="game-title">📱 Netwerk</div>
+              <p>Speel met meerdere apparaten in dezelfde room en deel live dezelfde racebaan.</p>
+            </div>
+            <div class="row wrap">
+              <button class="button primary" data-action="open-network">Maak game</button>
+              <button class="button" data-action="open-network-join">Join game by code</button>
+            </div>
+          </article>
+        </section>
+      `;
+    }
+
+    function aiTemplate() {
+      return `
+        <section class="grid two-grid">
+          <article class="panel pad stack">
+            <div>
+              <h2>Speler</h2>
+              <input class="field" data-bind="name" value="${escapeHtml(state.name)}" maxlength="24" aria-label="Naam speler" />
+            </div>
+            ${avatarGridTemplate(state.skin, "skin")}
+            <div>
+              <h3>AI niveau</h3>
+              <div class="choice-grid">
+                ${Object.keys(AI).map((key) => `
+                  <button class="select-button ${state.level === key ? "active" : ""}" data-action="set-level" data-level="${key}">
+                    ${AI[key].name}
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          </article>
+          ${setupTemplate("start-ai")}
+        </section>
+      `;
+    }
+
+    function lobbyTemplate() {
+      return `
+        <section class="grid two-grid">
+          <article class="panel pad">
+            <h2>Roomcode <span style="color:var(--primary-dark)">${escapeHtml(state.code)}</span></h2>
+            <div class="row">
+              <input class="field" data-bind="newName" value="${escapeHtml(state.newName)}" placeholder="Naam speler" maxlength="24" aria-label="Naam speler toevoegen" />
+              <button class="button primary" data-action="add-player" aria-label="Speler toevoegen">+</button>
+            </div>
+            <div style="margin-top:14px">${avatarGridTemplate(state.newSkin, "newSkin")}</div>
+            <div class="player-list">
+              ${state.players.map((player) => `
+                <div class="player-row">
+                  ${avatar(player.skin, 46)}
+                  <span>${escapeHtml(player.name)}</span>
+                </div>
+              `).join("")}
+            </div>
+          </article>
+          ${setupTemplate("start-multi")}
+        </section>
+      `;
+    }
+
+    function networkTemplate() {
+      return `
+        <section class="grid two-grid">
+          <article class="panel pad stack">
+            <div>
+              <h2>Join game by code</h2>
+              <input class="field" data-bind="networkName" value="${escapeHtml(state.networkName)}" maxlength="24" aria-label="Naam netwerkspeler" />
+            </div>
+            ${avatarGridTemplate(state.networkSkin, "networkSkin")}
+            <div>
+              <h3>Roomcode</h3>
+              <div class="row">
+                <input class="field" data-bind="networkJoinCode" value="${escapeHtml(state.networkJoinCode)}" maxlength="5" placeholder="ABCDE" aria-label="Roomcode invullen" />
+                <button class="button primary" data-action="network-join" ${state.networkLoading ? "disabled" : ""}>Join game</button>
+              </div>
+            </div>
+            ${networkErrorTemplate()}
+          </article>
+          <article class="panel pad stack">
+            <div>
+              <h2>Maak netwerkgame</h2>
+              <h3>Tafels kiezen</h3>
+              <div class="table-grid">
+                ${[1,2,3,4,5,6,7,8,9,10].map((number) => `
+                  <button class="select-button ${state.tables.includes(number) ? "active" : ""}" data-action="toggle-table" data-table="${number}">
+                    ${number}
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+            <div>
+              <h3>Aantal vragen</h3>
+              <div class="choice-grid">
+                ${[10,20,30].map((number) => `
+                  <button class="select-button ${state.rounds === number ? "active" : ""}" data-action="set-rounds" data-rounds="${number}">
+                    ${number}
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+            <button class="button primary" data-action="network-create" ${state.networkLoading ? "disabled" : ""}>Maak netwerkroom</button>
+          </article>
+        </section>
+      `;
+    }
+
+    function networkRoomTemplate() {
+      const room = state.networkRoom;
+      if (!room) return networkTemplate();
+      if (room.status === "lobby") return networkLobbyTemplate(room);
+      if (room.status === "game") return networkGameTemplate(room);
+      if (room.status === "result") return networkResultTemplate(room);
+      return networkTemplate();
+    }
+
+    function networkLobbyTemplate(room) {
+      const isHost = room.hostId === state.networkClientId;
+      const canStart = isHost && room.players.length >= 2;
+      const shareUrl = networkShareUrl(room.code);
+      return `
+        <section class="panel pad stack">
+          <div class="between wrap">
+            <div>
+              <h2>Netwerkroom</h2>
+              <div class="room-code">${escapeHtml(room.code)}</div>
+            </div>
+            <button class="button" data-action="network-leave">Terug</button>
+          </div>
+          ${isHost ? `
+            <div>
+              <h3>Deel deze link</h3>
+              <div class="row">
+                <input class="field" value="${escapeHtml(shareUrl)}" readonly aria-label="Deellink" />
+                <button class="button" data-action="network-copy-link" data-link="${escapeHtml(shareUrl)}">Kopieer</button>
+              </div>
+            </div>
+          ` : ""}
+          <div class="player-list">
+            ${room.players.map((player) => `
+              <div class="player-row">
+                ${avatar(player.skin, 44)}
+                <span>${escapeHtml(player.name)}${player.id === room.hostId ? " · host" : ""}</span>
+              </div>
+            `).join("")}
+          </div>
+          ${isHost
+            ? `<button class="button primary" data-action="network-start" ${canStart ? "" : "disabled"}>Start netwerkspel</button>`
+            : `<div class="note indigo">Wachten op de host</div>`}
+          ${networkErrorTemplate()}
+        </section>
+      `;
+    }
+
+    function networkGameTemplate(room) {
+      const own = room.players.find((player) => player.id === state.networkClientId) || room.players[0] || { score: 0 };
+      const sorted = [...room.players].sort((a, b) => b.score - a.score);
+      const answered = room.answeredIds?.includes(state.networkClientId);
+      const ownFeedback = room.feedbackByPlayer?.[state.networkClientId];
+      const canAnswer = !answered && !room.locked;
+      const color = ownFeedback?.color || "";
+      const secondsLeft = Math.max(0, Math.ceil(((room.questionEndsAt || Date.now()) - Date.now()) / 1000));
+      const status = ownFeedback?.msg || (canAnswer ? "Typ" : (room.locked ? "Nieuwe vraag" : "Ingezonden"));
+
+      return `
+        <section class="stack">
+          <div class="panel pad grid stats-grid">
+            ${statTemplate("Spelers", room.players.length)}
+            ${statTemplate("Vraag", `${room.qNum}/${room.rounds}`)}
+            ${statTemplate("Tijd", `${secondsLeft}s`)}
+            ${statTemplate("Jouw score", own.score)}
+            ${statTemplate("Status", status)}
+          </div>
+          <div class="grid game-grid">
+            <div class="stack">
+              ${raceTemplate(room.players, room.finish)}
+              ${scoreTemplate(sorted)}
+              ${networkErrorTemplate()}
+            </div>
+            <article class="panel question">
+              <div class="sum ${color}">${escapeHtml(room.q?.text || "1 × 1")}</div>
+              <input
+                id="network-answer"
+                class="answer ${color}"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="3"
+                value="${escapeHtml(state.networkAnswer)}"
+                aria-label="Netwerk antwoord"
+                ${canAnswer ? "" : "disabled"}
+              />
+              ${networkKeypadTemplate(canAnswer)}
+              ${ownFeedback ? `<div class="message">${escapeHtml(ownFeedback.msg)}</div>` : ""}
+              ${!answered && !room.locked ? `<div class="turn-banner">Iedereen antwoordt tegelijk</div>` : ""}
+              ${answered && !room.locked ? `<div class="turn-banner">Wachten op andere spelers</div>` : ""}
+            </article>
+          </div>
+        </section>
+      `;
+    }
+
+    function networkResultTemplate(room) {
+      const sorted = [...room.players].sort((a, b) => b.score - a.score);
+      const winner = room.players.find((player) => player.id === room.winnerId) || sorted[0] || { name: "Speler", skin: "horse", score: 0 };
+      const isHost = room.hostId === state.networkClientId;
+      return `
+        ${confettiTemplate()}
+        <section class="panel pad">
+          <h2 style="text-align:center">🏆 Winnaar: ${avatar(winner.skin, 54)} ${escapeHtml(winner.name)}</h2>
+          <div class="party-stage">
+            <div class="balloon left">🎈</div>
+            <div class="winner-face">
+              ${avatar(winner.skin, 92)}
+              <div>${escapeHtml(winner.name)}</div>
+              <div style="color:#be123c;font-size:1.2rem">🎉 Netwerkronde gewonnen! 🎉</div>
+            </div>
+            <div class="balloon right">🎈</div>
+          </div>
+          ${podiumTemplate(sorted.slice(0, 3))}
+          <div class="grid result-grid">
+            ${sorted.map((player, index) => `
+              <div class="player-row">
+                <strong>${index + 1}.</strong>${avatar(player.skin, 38)}<span>${escapeHtml(player.name)} - ${player.score}</span>
+              </div>
+            `).join("")}
+          </div>
+          <div class="row wrap" style="margin-top:16px">
+            ${isHost ? `<button class="button primary" data-action="network-start">Nog een netwerkronde</button>` : `<span class="button">Wachten op host</span>`}
+            <button class="button" data-action="network-leave">Home</button>
+          </div>
+          ${networkErrorTemplate()}
+        </section>
+      `;
+    }
+
+    function networkKeypadTemplate(canAnswer) {
+      const disabled = canAnswer ? "" : "disabled";
+      return `
+        <div class="keypad">
+          ${[1,2,3,4,5,6,7,8,9].map((number) => `
+            <button class="key" data-action="network-digit" data-digit="${number}" ${disabled}>${number}</button>
+          `).join("")}
+          <button class="key" data-action="network-backspace" ${disabled}>←</button>
+          <button class="key" data-action="network-digit" data-digit="0" ${disabled}>0</button>
+          <button class="key enter" data-action="network-check" ${disabled}>✓</button>
+          <button class="key clear" data-action="network-clear" ${disabled}>Alles wissen</button>
+        </div>
+      `;
+    }
+
+    function networkShareUrl(code) {
+      const localHost = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+      const origin = localHost ? LAN_ORIGIN : window.location.origin;
+      return `${origin}${window.location.pathname}?room=${code}`;
+    }
+
+    function networkErrorTemplate() {
+      return state.networkError ? `<div class="error">${escapeHtml(state.networkError)}</div>` : "";
+    }
+
+    function avatarGridTemplate(selected, target) {
+      return `
+        <div class="avatar-grid" aria-label="Avatar kiezen">
+          ${AVATARS.map((item) => `
+            <button
+              class="avatar-button ${selected === item.id ? "active" : ""}"
+              data-action="set-avatar"
+              data-target="${target}"
+              data-avatar="${item.id}"
+              title="${escapeHtml(item.name)}"
+              aria-label="${escapeHtml(item.name)}"
+            >${avatar(item.id, 38)}</button>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function setupTemplate(startAction) {
+      return `
+        <article class="panel pad stack">
+          <div>
+            <h2>Tafels kiezen</h2>
+            <div class="table-grid">
+              ${[1,2,3,4,5,6,7,8,9,10].map((number) => `
+                <button class="select-button ${state.tables.includes(number) ? "active" : ""}" data-action="toggle-table" data-table="${number}">
+                  ${number}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+          <div>
+            <h3>Aantal vragen</h3>
+            <div class="choice-grid">
+              ${[10,20,30].map((number) => `
+                <button class="select-button ${state.rounds === number ? "active" : ""}" data-action="set-rounds" data-rounds="${number}">
+                  ${number}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+          <button class="button primary" data-action="${startAction}">Start spel</button>
+        </article>
+      `;
+    }
+
+    function gameTemplate() {
+      const active = activePlayer();
+      const finish = finishScore();
+      const sorted = sortedPlayers();
+      const color = state.feedbackColor === "neutral" ? "" : state.feedbackColor;
+
+      return `
+        <section class="stack">
+          <div class="panel pad grid stats-grid">
+            ${statTemplate("Aan zet", `${avatar(active.skin, 44)} ${escapeHtml(active.name)}`, true)}
+            ${statTemplate("Vraag", `${state.qNum}/${state.rounds}`)}
+            ${statTemplate("Finish", finish)}
+            ${statTemplate("Score", active.score)}
+            ${statTemplate("Status", state.msg || (state.bonus ? "Bonus" : "Typ"))}
+          </div>
+          <div class="grid game-grid">
+            <div class="stack">
+              ${raceTemplate(state.players, finish)}
+              ${state.bonusMsg ? `<div class="note indigo">${escapeHtml(state.bonusMsg)}</div>` : ""}
+              ${state.repeatMsg ? `<div class="note amber">${escapeHtml(state.repeatMsg)}</div>` : ""}
+              ${scoreTemplate(sorted)}
+            </div>
+            <article class="panel question">
+              <div class="sum ${color}">${escapeHtml(state.q.text)}</div>
+              <input
+                id="answer"
+                class="answer ${color}"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="3"
+                value="${escapeHtml(state.answer)}"
+                aria-label="Antwoord"
+                ${state.msg ? "disabled" : ""}
+              />
+              ${keypadTemplate()}
+              ${state.msg ? `<div class="message">${escapeHtml(state.msg)}</div>` : ""}
+            </article>
+          </div>
+        </section>
+      `;
+    }
+
+    function statTemplate(label, value, htmlValue = false) {
+      return `
+        <div class="stat">
+          <div class="stat-label">${escapeHtml(label)}</div>
+          <div class="stat-value">${htmlValue ? value : escapeHtml(value)}</div>
+        </div>
+      `;
+    }
+
+    function raceTemplate(players, finish) {
+      return `
+        <article class="panel track-card">
+          <h2 style="font-size:1.35rem">Racebaan</h2>
+          ${players.map((player) => {
+            const left = Math.min(86, (player.score / finish) * 100);
+            return `
+              <div class="lane">
+                <div class="lane-label">
+                  <span class="row">${avatar(player.skin, 38)} ${escapeHtml(player.name)}</span>
+                  <span>${player.score}/${finish}</span>
+                </div>
+                <div class="track">
+                  <div class="track-line"></div>
+                  <div class="finish-line"></div>
+                  <div class="flag">🏁</div>
+                  <div class="racer" style="left:${left}%">${avatar(player.skin, 62)}</div>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </article>
+      `;
+    }
+
+    function scoreTemplate(players) {
+      return `
+        <article class="panel pad">
+          <h2 style="font-size:1.35rem">Stand</h2>
+          ${players.map((player, index) => `
+            <div class="score-row">
+              <span class="row"><strong>${index + 1}.</strong>${avatar(player.skin, 36)} ${escapeHtml(player.name)}</span>
+              <span>${player.score}</span>
+            </div>
+          `).join("")}
+        </article>
+      `;
+    }
+
+    function keypadTemplate() {
+      const disabled = state.msg ? "disabled" : "";
+      return `
+        <div class="keypad">
+          ${[1,2,3,4,5,6,7,8,9].map((number) => `
+            <button class="key" data-action="digit" data-digit="${number}" ${disabled}>${number}</button>
+          `).join("")}
+          <button class="key" data-action="backspace" ${disabled}>←</button>
+          <button class="key" data-action="digit" data-digit="0" ${disabled}>0</button>
+          <button class="key enter" data-action="check" ${disabled}>✓</button>
+          <button class="key clear" data-action="clear-answer" ${disabled}>Alles wissen</button>
+        </div>
+      `;
+    }
+
+    function resultTemplate() {
+      const sorted = sortedPlayers();
+      const winner = sorted[0] || { name: "Speler", skin: "horse", score: 0 };
+      return `
+        ${confettiTemplate()}
+        <section class="panel pad">
+          <h2 style="text-align:center">🏆 Winnaar: ${avatar(winner.skin, 54)} ${escapeHtml(winner.name)}</h2>
+          <div class="party-stage">
+            <div class="balloon left">🎈</div>
+            <div class="winner-face">
+              ${avatar(winner.skin, 92)}
+              <div>${escapeHtml(winner.name)}</div>
+              <div style="color:#be123c;font-size:1.2rem">🎉 Feest op het podium! 🎉</div>
+            </div>
+            <div class="balloon right">🎈</div>
+          </div>
+          ${podiumTemplate(sorted.slice(0, 3))}
+          ${miniUnlockTemplate()}
+          <div class="grid result-grid">
+            ${sorted.map((player, index) => `
+              <div class="player-row">
+                <strong>${index + 1}.</strong>${avatar(player.skin, 38)}<span>${escapeHtml(player.name)} - ${player.score}</span>
+              </div>
+            `).join("")}
+          </div>
+          <div class="row wrap" style="margin-top:16px">
+            <button class="button primary" data-action="${state.mode === "ai" ? "start-ai" : "start-multi"}">Nog een ronde</button>
+            <button class="button" data-action="home">Home</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function miniUnlockTemplate() {
+      if (state.mode !== "ai" || state.aiWinStreak < 2 || state.miniChoices.length === 0) return "";
+      return `
+        <section class="panel pad" style="margin:16px 0;background:#ecfdf5">
+          <h2 style="font-size:1.45rem">🎮 Minigame vrijgespeeld</h2>
+          <div class="grid home-grid">
+            ${state.miniChoices.map((game) => `
+              <button class="button success" data-action="start-mini" data-game="${game.id}">
+                ${game.icon} ${escapeHtml(game.name)}
+              </button>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function podiumTemplate(players) {
+      const order = [players[1], players[0], players[2]];
+      return `
+        <div class="podium">
+          ${order.map((player, index) => {
+            const place = index === 0 ? 2 : index === 1 ? 1 : 3;
+            return `
+              <div>
+                ${player ? avatar(player.skin, 68) : `<span style="font-size:68px"> </span>`}
+                <div style="font-weight:1000;min-height:24px">${player ? escapeHtml(player.name) : ""}</div>
+                <div class="podium-block place-${place}">${player ? place : ""}</div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function confettiTemplate() {
+      const colors = ["#ef4444", "#22c55e", "#3b82f6", "#eab308", "#a855f7", "#f97316"];
+      return `
+        <div class="confetti" aria-hidden="true">
+          ${Array.from({ length: 42 }, (_, index) => `
+            <i style="
+              left:${(index * 17) % 100}%;
+              background:${colors[index % colors.length]};
+              animation-duration:${3 + (index % 4) * 0.45}s;
+              animation-delay:${(index % 9) * 0.22}s;
+            "></i>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function miniGameTemplate() {
+      const game = GAMES.find((item) => item.id === state.miniGame) || GAMES[0];
+      const targetIcon = state.miniGame === "soccer" ? "⚽" : "⭐";
+      return `
+        <section class="mini-shell">
+          <div class="between wrap">
+            <div>
+              <h2 style="color:white;margin-bottom:4px">${game.icon} ${escapeHtml(game.name)}</h2>
+              <div style="font-weight:1000;color:#cbd5e1">Tijd ${state.miniTime}s · Score ${state.miniScore}</div>
+            </div>
+            <button class="button" data-action="mini-done">Stop</button>
+          </div>
+          <div class="mini-board" aria-label="${escapeHtml(game.name)} speelveld">
+            ${state.miniGame === "soccer" ? `<div class="goal"></div>` : ""}
+            <div class="mini-item" style="left:${state.miniTarget.x * 5.6}%;top:${state.miniTarget.y * 8}%">${targetIcon}</div>
+            ${state.miniGame === "dodge" ? `<div class="mini-item" style="left:${state.miniBad.x * 5.6}%;top:${state.miniBad.y * 8}%">🟥</div>` : ""}
+            <div class="mini-item" style="left:${state.miniPos.x * 5.6}%;top:${state.miniPos.y * 8}%">😀</div>
+          </div>
+          <div class="mini-controls" aria-label="Besturing">
+            <button class="button up" data-action="mini-move" data-dx="0" data-dy="-1">↑</button>
+            <button class="button left" data-action="mini-move" data-dx="-1" data-dy="0">←</button>
+            <button class="button down" data-action="mini-move" data-dx="0" data-dy="1">↓</button>
+            <button class="button right" data-action="mini-move" data-dx="1" data-dy="0">→</button>
+            <button class="button primary shoot" data-action="mini-shoot">Schiet</button>
+          </div>
+          ${state.miniTime === 0 ? `<div class="message">Klaar! Score: ${state.miniScore}</div>` : ""}
+        </section>
+      `;
+    }
+
+    function toggleTable(number) {
+      if (state.tables.includes(number)) {
+        if (state.tables.length > 1) state.tables = state.tables.filter((item) => item !== number);
+      } else {
+        state.tables = [...state.tables, number].sort((a, b) => a - b);
+      }
+      render();
+    }
+
+    function addPlayer() {
+      const name = state.newName.trim();
+      if (!name) return;
+      state.players = [
+        ...state.players,
+        { id: Date.now(), name, skin: state.newSkin, score: 0, streak: 0, answers: 0, ai: false },
+      ];
+      state.newName = "";
+      render();
+    }
+
+    function resetRound() {
+      state.answer = "";
+      state.msg = "";
+      state.bonus = false;
+      state.bonusMsg = "";
+      state.feedbackColor = "neutral";
+    }
+
+    function startGame(mode, players) {
+      clearTimeout(nextTimer);
+      clearTimeout(bonusTimer);
+      state.mode = mode;
+      state.players = players;
+      state.turn = 0;
+      state.qNum = 1;
+      state.repeatQueue = [];
+      state.repeatMsg = "";
+      state.mistakeCounts = {};
+      state.q = newQuestion(state.tables);
+      resetRound();
+      state.screen = "game";
+      render();
+    }
+
+    function startMulti() {
+      startGame("multi", state.players.map((player) => ({
+        ...player,
+        score: 0,
+        streak: 0,
+        answers: 0,
+        ai: false,
+      })));
+    }
+
+    function startAi() {
+      const playerName = state.name.trim() || "Speler";
+      startGame("ai", [
+        { id: 1, name: playerName, skin: state.skin, score: 0, streak: 0, answers: 0, ai: false },
+        { id: 2, name: `AI ${AI[state.level].name}`, skin: "rocket", score: 0, streak: 0, answers: 0, ai: true },
+      ]);
+    }
+
+    function nextQuestion() {
+      if (state.players.some((player) => player.score >= finishScore()) || state.qNum >= state.rounds) {
+        endGame();
+        return;
+      }
+
+      const updatedQueue = state.repeatQueue.map((item) => ({ ...item, due: item.due - 1 }));
+      const repeatedIndex = updatedQueue.findIndex((item) => item.due <= 0);
+      const repeatedQuestion = repeatedIndex >= 0 ? updatedQueue[repeatedIndex].question : null;
+
+      state.repeatQueue = repeatedIndex >= 0
+        ? updatedQueue.filter((_, index) => index !== repeatedIndex)
+        : updatedQueue;
+      state.turn = state.mode === "ai" ? 0 : state.turn + 1;
+      state.qNum += 1;
+      state.q = repeatedQuestion || newQuestion(state.tables);
+      resetRound();
+      if (repeatedQuestion) state.repeatMsg = "";
+      render();
+    }
+
+    function checkAnswer() {
+      if (!state.answer || state.msg) return;
+      const active = activePlayer();
+      const wasSlow = Date.now() - questionStartedAt > 4000;
+      const ok = Number(state.answer) === state.q.answer;
+      const points = ok ? 10 + Math.min(active.streak * 2, 10) : 0;
+      const nextStreak = ok ? active.streak + 1 : 0;
+      const qKey = state.q.text;
+      const mistakes = state.mistakeCounts[qKey] || 0;
+      const nextMistakes = ok ? mistakes : mistakes + 1;
+      let bonusPoints = 0;
+
+      if (!ok) state.mistakeCounts[qKey] = nextMistakes;
+      state.feedbackColor = ok ? "green" : (nextMistakes >= 2 ? "red" : "orange");
+
+      if (ok && nextStreak % 3 === 0) {
+        bonusPoints = 20;
+        state.bonus = true;
+        state.bonusMsg = `⚡ Automatische bonus voor ${active.name}: +${bonusPoints}`;
+        clearTimeout(bonusTimer);
+        bonusTimer = setTimeout(() => {
+          state.bonus = false;
+          render();
+        }, 1800);
+      }
+
+      state.players = state.players.map((player) => {
+        if (player.id !== active.id) return player;
+        return {
+          ...player,
+          score: player.score + points + bonusPoints,
+          streak: nextStreak,
+          answers: player.answers + 1,
+        };
+      });
+
+      if (wasSlow || !ok) {
+        const due = Math.floor(Math.random() * 3) + 1;
+        state.repeatQueue = [...state.repeatQueue, { question: state.q, due }];
+        state.repeatMsg = wasSlow && !ok
+          ? `🔁 Te lang én fout: ${state.q.text} komt terug.`
+          : wasSlow
+            ? `🔁 Lang nagedacht: ${state.q.text} komt terug.`
+            : `🔁 Fout: ${state.q.text} komt terug.`;
+      }
+
+      state.msg = ok ? `✅ Goed! +${points + bonusPoints}` : `❌ Het antwoord was ${state.q.answer}`;
+      render();
+      nextTimer = setTimeout(nextQuestion, ok ? 900 : 1300);
+    }
+
+    function endGame() {
+      clearTimeout(nextTimer);
+      const winner = sortedPlayers()[0] || { ai: false };
+      if (state.mode === "ai" && !winner.ai) {
+        state.aiWinStreak += 1;
+        state.miniChoices = state.aiWinStreak >= 2 ? pickMiniGames() : [];
+      } else if (state.mode === "ai") {
+        state.aiWinStreak = 0;
+        state.miniChoices = [];
+      }
+      state.screen = "result";
+      render();
+    }
+
+    function pickMiniGames() {
+      return [...GAMES].sort(() => Math.random() - 0.5).slice(0, 2);
+    }
+
+    function digit(value) {
+      if (state.msg) return;
+      state.answer = `${state.answer}${value}`.slice(0, 3);
+      render();
+    }
+
+    function backspace() {
+      if (state.msg) return;
+      state.answer = state.answer.slice(0, -1);
+      render();
+    }
+
+    function clearAnswer() {
+      if (state.msg) return;
+      state.answer = "";
+      render();
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+        },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Netwerkactie mislukt.");
+      return data;
+    }
+
+    function setNetworkRoom(room) {
+      const previous = state.networkRoom;
+      const questionChanged = previous?.qNum !== room.qNum || previous?.q?.text !== room.q?.text || previous?.status !== room.status;
+      state.networkRoom = room;
+      if (questionChanged) state.networkAnswer = "";
+    }
+
+    async function createNetworkRoom() {
+      state.networkLoading = true;
+      state.networkError = "";
+      render();
+      try {
+        const data = await apiRequest("/api/rooms", {
+          method: "POST",
+          body: JSON.stringify({
+            name: state.networkName,
+            skin: state.networkSkin,
+            tables: state.tables,
+            rounds: state.rounds,
+          }),
+        });
+        state.networkClientId = data.clientId;
+        setNetworkRoom(data.room);
+        state.networkLoading = false;
+        state.screen = "networkRoom";
+        render();
+      } catch (error) {
+        state.networkLoading = false;
+        state.networkError = error.message;
+        render();
+      }
+    }
+
+    async function joinNetworkRoom() {
+      const code = state.networkJoinCode.trim().toUpperCase();
+      if (code.length !== 5) {
+        state.networkError = "Vul een roomcode van 5 tekens in.";
+        render();
+        return;
+      }
+      state.networkLoading = true;
+      state.networkError = "";
+      render();
+      try {
+        const data = await apiRequest(`/api/rooms/${code}/join`, {
+          method: "POST",
+          body: JSON.stringify({
+            name: state.networkName,
+            skin: state.networkSkin,
+          }),
+        });
+        state.networkClientId = data.clientId;
+        setNetworkRoom(data.room);
+        state.networkLoading = false;
+        state.screen = "networkRoom";
+        render();
+      } catch (error) {
+        state.networkLoading = false;
+        state.networkError = error.message;
+        render();
+      }
+    }
+
+    async function refreshNetworkRoom() {
+      if (networkRefreshing || !state.networkRoom || !state.networkClientId) return;
+      networkRefreshing = true;
+      try {
+        const data = await apiRequest(`/api/rooms/${state.networkRoom.code}`);
+        setNetworkRoom(data.room);
+        state.networkError = "";
+        if (state.screen === "networkRoom") render();
+      } catch (error) {
+        state.networkError = error.message;
+        if (state.screen === "networkRoom") render();
+      } finally {
+        networkRefreshing = false;
+      }
+    }
+
+    async function startNetworkRoom() {
+      if (!state.networkRoom) return;
+      state.networkError = "";
+      render();
+      try {
+        const data = await apiRequest(`/api/rooms/${state.networkRoom.code}/start`, {
+          method: "POST",
+          body: JSON.stringify({ clientId: state.networkClientId }),
+        });
+        setNetworkRoom(data.room);
+        render();
+      } catch (error) {
+        state.networkError = error.message;
+        render();
+      }
+    }
+
+    async function submitNetworkAnswer() {
+      if (!state.networkRoom || !state.networkAnswer) return;
+      state.networkError = "";
+      const answer = state.networkAnswer;
+      try {
+        const data = await apiRequest(`/api/rooms/${state.networkRoom.code}/answer`, {
+          method: "POST",
+          body: JSON.stringify({ clientId: state.networkClientId, answer }),
+        });
+        state.networkAnswer = "";
+        setNetworkRoom(data.room);
+        render();
+      } catch (error) {
+        state.networkError = error.message;
+        render();
+      }
+    }
+
+    function networkDigit(value) {
+      if (!state.networkRoom) return;
+      state.networkAnswer = `${state.networkAnswer}${value}`.slice(0, 3);
+      render();
+    }
+
+    function networkBackspace() {
+      state.networkAnswer = state.networkAnswer.slice(0, -1);
+      render();
+    }
+
+    function clearNetworkAnswer() {
+      state.networkAnswer = "";
+      render();
+    }
+
+    function leaveNetworkRoom() {
+      state.networkRoom = null;
+      state.networkClientId = "";
+      state.networkAnswer = "";
+      state.networkError = "";
+      state.screen = "network";
+      render();
+    }
+
+    async function copyNetworkLink(link) {
+      try {
+        await navigator.clipboard.writeText(link);
+        state.networkError = "Link gekopieerd.";
+      } catch {
+        state.networkError = "Kopieer de link uit het veld.";
+      }
+      render();
+    }
+
+    function syncTimers() {
+      const shouldRunAi = state.screen === "game" && state.mode === "ai";
+      if (shouldRunAi && (!aiTimer || aiTimerLevel !== state.level)) {
+        clearInterval(aiTimer);
+        aiTimerLevel = state.level;
+        aiTimer = setInterval(() => {
+          state.players = state.players.map((player) => (
+            player.ai ? { ...player, score: player.score + AI[state.level].points, answers: player.answers + 1 } : player
+          ));
+          if (state.players.some((player) => player.score >= finishScore())) endGame();
+          else render();
+        }, AI[state.level].speed);
+      }
+      if (!shouldRunAi && aiTimer) {
+        clearInterval(aiTimer);
+        aiTimer = null;
+        aiTimerLevel = null;
+      }
+
+      if (state.screen === "minigame" && !miniTimer) {
+        miniTimer = setInterval(() => {
+          if (state.miniTime <= 1) {
+            state.miniTime = 0;
+            clearInterval(miniTimer);
+            miniTimer = null;
+            render();
+            setTimeout(() => {
+              if (state.screen === "minigame") {
+                state.screen = "home";
+                render();
+              }
+            }, 1800);
+            return;
+          }
+          state.miniTime -= 1;
+          render();
+        }, 1000);
+      }
+      if (state.screen !== "minigame" && miniTimer) {
+        clearInterval(miniTimer);
+        miniTimer = null;
+      }
+
+      const shouldPollNetwork = state.screen === "networkRoom" && state.networkRoom && state.networkClientId;
+      if (shouldPollNetwork && !networkPollTimer) {
+        networkPollTimer = setInterval(refreshNetworkRoom, 650);
+      }
+      if (!shouldPollNetwork && networkPollTimer) {
+        clearInterval(networkPollTimer);
+        networkPollTimer = null;
+      }
+    }
+
+    function startMiniGame(game) {
+      clearInterval(miniTimer);
+      miniTimer = null;
+      state.miniGame = game;
+      state.miniTime = 60;
+      state.miniScore = 0;
+      state.miniPos = { x: 5, y: 5 };
+      state.miniTarget = { x: 12, y: 7 };
+      state.miniBad = { x: 3, y: 3 };
+      state.aiWinStreak = 0;
+      state.miniChoices = [];
+      state.screen = "minigame";
+      render();
+    }
+
+    function miniMove(dx, dy) {
+      if (state.screen !== "minigame" || state.miniTime === 0) return;
+      state.miniPos = {
+        x: Math.max(0, Math.min(16, state.miniPos.x + dx)),
+        y: Math.max(0, Math.min(10, state.miniPos.y + dy)),
+      };
+      checkMiniCollisions();
+      render();
+    }
+
+    function miniShoot() {
+      if (state.screen !== "minigame" || state.miniTime === 0 || state.miniGame !== "soccer") return;
+      const closeX = Math.abs(state.miniPos.x - state.miniTarget.x) <= 2;
+      const closeY = Math.abs(state.miniPos.y - state.miniTarget.y) <= 2;
+      if (closeX && closeY) {
+        state.miniScore += 5;
+        state.miniTarget = randomMiniSpot();
+        render();
+      }
+    }
+
+    function checkMiniCollisions() {
+      if (state.miniPos.x === state.miniTarget.x && state.miniPos.y === state.miniTarget.y) {
+        state.miniScore += 1;
+        state.miniTarget = randomMiniSpot();
+      }
+      if (state.miniGame === "dodge" && state.miniPos.x === state.miniBad.x && state.miniPos.y === state.miniBad.y) {
+        state.miniScore = Math.max(0, state.miniScore - 2);
+        state.miniBad = randomMiniSpot();
+      }
+    }
+
+    function randomMiniSpot() {
+      return { x: Math.floor(Math.random() * 16), y: Math.floor(Math.random() * 10) };
+    }
+
+    function goHome() {
+      state.screen = "home";
+      clearTimeout(nextTimer);
+      render();
+    }
+
+    app.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+      const action = button.dataset.action;
+
+      if (action === "home") goHome();
+      if (action === "open-multi") {
+        state.code = roomCode();
+        state.screen = "lobby";
+        render();
+      }
+      if (action === "open-ai") {
+        state.screen = "ai";
+        render();
+      }
+      if (action === "open-network") {
+        state.networkError = "";
+        state.screen = state.networkRoom ? "networkRoom" : "network";
+        render();
+      }
+      if (action === "open-network-join") {
+        state.networkError = "";
+        state.networkRoom = null;
+        state.networkClientId = "";
+        state.screen = "network";
+        render();
+        window.setTimeout(() => document.querySelector('[data-bind="networkJoinCode"]')?.focus(), 30);
+      }
+      if (action === "set-avatar") {
+        state[button.dataset.target] = button.dataset.avatar;
+        render();
+      }
+      if (action === "set-level") {
+        state.level = button.dataset.level;
+        render();
+      }
+      if (action === "toggle-table") toggleTable(Number(button.dataset.table));
+      if (action === "set-rounds") {
+        state.rounds = Number(button.dataset.rounds);
+        render();
+      }
+      if (action === "add-player") addPlayer();
+      if (action === "start-multi") startMulti();
+      if (action === "start-ai") startAi();
+      if (action === "digit") digit(button.dataset.digit);
+      if (action === "backspace") backspace();
+      if (action === "clear-answer") clearAnswer();
+      if (action === "check") checkAnswer();
+      if (action === "start-mini") startMiniGame(button.dataset.game);
+      if (action === "mini-done") {
+        state.screen = "home";
+        render();
+      }
+      if (action === "mini-move") miniMove(Number(button.dataset.dx), Number(button.dataset.dy));
+      if (action === "mini-shoot") miniShoot();
+      if (action === "network-create") createNetworkRoom();
+      if (action === "network-join") joinNetworkRoom();
+      if (action === "network-start") startNetworkRoom();
+      if (action === "network-leave") leaveNetworkRoom();
+      if (action === "network-digit") networkDigit(button.dataset.digit);
+      if (action === "network-backspace") networkBackspace();
+      if (action === "network-clear") clearNetworkAnswer();
+      if (action === "network-check") submitNetworkAnswer();
+      if (action === "network-copy-link") copyNetworkLink(button.dataset.link);
+    });
+
+    app.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-bind]")) {
+        if (target.dataset.bind === "networkJoinCode") {
+          target.value = target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+        }
+        state[target.dataset.bind] = target.value;
+      }
+      if (target.id === "answer") {
+        state.answer = target.value.replace(/\D/g, "").slice(0, 3);
+        target.value = state.answer;
+      }
+      if (target.id === "network-answer") {
+        state.networkAnswer = target.value.replace(/\D/g, "").slice(0, 3);
+        target.value = state.networkAnswer;
+      }
+    });
+
+    app.addEventListener("keydown", (event) => {
+      if (event.target && event.target.id === "answer" && event.key === "Enter") {
+        checkAnswer();
+      }
+      if (event.target && event.target.id === "network-answer" && event.key === "Enter") {
+        submitNetworkAnswer();
+      }
+      if (event.target && event.target.matches("[data-bind]") && event.key === "Enter") {
+        if (state.screen === "lobby") addPlayer();
+        if (state.screen === "network") joinNetworkRoom();
+      }
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (state.screen !== "minigame") return;
+      const keys = {
+        ArrowUp: [0, -1],
+        ArrowDown: [0, 1],
+        ArrowLeft: [-1, 0],
+        ArrowRight: [1, 0],
+      };
+      if (keys[event.key]) {
+        event.preventDefault();
+        miniMove(keys[event.key][0], keys[event.key][1]);
+      }
+      if (event.key === " ") {
+        event.preventDefault();
+        miniShoot();
+      }
+    });
+
+    const initialRoomCode = new URLSearchParams(window.location.search).get("room");
+    if (initialRoomCode) {
+      state.networkJoinCode = initialRoomCode.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      state.screen = "network";
+    }
+
+    render();
+  </script>
+</body>
+</html>
