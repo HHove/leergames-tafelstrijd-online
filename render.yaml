@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: leergames-tafelstrijd
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
