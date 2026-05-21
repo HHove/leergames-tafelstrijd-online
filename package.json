@@ -1,0 +1,13 @@
+{
+  "name": "leergames-tafelstrijd",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Leergames Tafelstrijd met online multiplayer rooms.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
